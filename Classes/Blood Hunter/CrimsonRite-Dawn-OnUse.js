@@ -5,6 +5,7 @@
   let target = canvas.tokens.get(args[0].hitTargets[0]._id);
   let actorD = game.actors.get(args[0].actor._id);
   let itemD = args[0].item;
+  let isCrit = args[0].isCritical;
 
   // Establish damage and type
   let hemoDie;
@@ -20,24 +21,17 @@
   }
   let riteDmgType = "radiant"
 
-  let msgHistory = await game.messages.entities.map(i => ({
-    _id: i.data._id,
-    user: i.data.user,
-    flavor: i.data.flavor,
-    actorId: i.data.flags["midi-qol"]?.actor,
-    itemId: i.data.flags["midi-qol"]?.itemId
-  })).filter(i => i.actorId === actorD._id && i.flavor != itemD.name);
-  if (msgHistory.length === 0) return ui.notifications.warn(`You need to successfully attack first.`);
-  let lastAttack = msgHistory[msgHistory.length];
-  let attackHistory = MidiQOL.Workflow.getWorkflow(lastAttack.itemId);
-
   let numDice = 1;
   let undead = ["undead", "fiend"].some(type => (target.actor.data.data.details.type || "").toLowerCase().includes(type));
   if (undead) numDice += 1;
-  let damageRoll = attackHistory.isCritical ? new Roll(`${numDice *2}d${hemoDie}`).roll() : new Roll(`${numDice}d${hemoDie}`).roll();
-  game.dice3d?.showForRoll(damageRoll);
+  if (isCrit) { numDice = numDice * 2}
+  let damageRoll = new Roll(`${numDice}d${hemoDie}[${riteDmgType}]`).roll();
+//  game.dice3d?.showForRoll(damageRoll);
+/*
   new MidiQOL.DamageOnlyWorkflow(actorD, target, damageRoll.total, riteDmgType, [target], damageRoll, {
     flavor: "(Crimson Rite: Rite of the Dawn)",
     itemCardId: args[0].itemCardId
   });
+*/
+  new MidiQOL.DamageOnlyWorkflow(actorD, target, damageRoll.total, riteDmgType, [target], damageRoll, {flavor: "Crimson Rite: Rite of the Dawn", });
 })();
