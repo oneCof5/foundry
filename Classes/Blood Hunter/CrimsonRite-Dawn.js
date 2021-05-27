@@ -1,7 +1,7 @@
 /*
 Blood Hunter Crimson Rite: Ghosthunter's Rite of the Dawn
 Contained in ItemMacro
-DAE Custom ItemMacro with @target as a param
+DAE Custom ItemMacro with @target @itemCardId as params
 
 On cast, the blood hunter damages themselves, reducing their hit points.
 The affected weapon then does bonus damage using the hemocrit die and rite type.
