@@ -26,7 +26,7 @@
   if (undead) numDice += 1;
   if (isCrit) { numDice = numDice * 2}
   let damageRoll = new Roll(`${numDice}d${hemoDie}[${riteDmgType}]`).roll();
-//  game.dice3d?.showForRoll(damageRoll);
+  //  game.dice3d?.showForRoll(damageRoll);
 /*
   new MidiQOL.DamageOnlyWorkflow(actorD, target, damageRoll.total, riteDmgType, [target], damageRoll, {
     flavor: "(Crimson Rite: Rite of the Dawn)",
