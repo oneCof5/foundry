@@ -112,12 +112,12 @@ if (args[0] === "on") {
           // Hemocrit Die Value and Damage Type
           const level = actorD.data.type === "npc" ? actorD.data.data.details.cr : actorD.classes["blood-hunter"].data.data.levels;
           let hemoDie = (4 + (2 * (Math.floor((level + 1) / 6))));
-          let attackDice = `1d${hemoDie}`
-          let damageRoll = new Roll(`${attackDice}`).evaluate({async:false});
+          let numDice = `1d${hemoDie}`
           let damage_type = "radiant";
+          let damageRoll = new Roll(`${numDice}`).roll();
+
           game.dice3d?.showForRoll(damageRoll);
           new MidiQOL.DamageOnlyWorkflow(actorD, tokenD, damageRoll.total, damage_type, [target], damageRoll, {flavor: `(${CONFIG.DND5E.damageTypes[damage_type]})`, itemCardId: lastArg.itemCardId, damageList: lastArg.damageList});
-
         }
       },
     },
