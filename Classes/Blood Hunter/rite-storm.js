@@ -1,16 +1,13 @@
-//DAE Macro, effect value = @item.level
-
 const lastArg = args[args.length - 1];
-let tactor;
-if (lastArg.tokenId) tactor = canvas.tokens.get(lastArg.tokenId).actor;
-else tactor = game.actors.get(lastArg.actorId);
+let actorD;
+if (lastArg.tokenId) actorD = canvas.tokens.get(lastArg.tokenId).actor;
+else actorD = game.actors.get(lastArg.actorId);
+let tokenD = canvas.tokens.get(lastArg.tokenId).actor;
 const target = canvas.tokens.get(lastArg.tokenId)
-const DAEItem = lastArg.efData.flags.dae.itemData
 
-let weapons = tactor.items.filter(i => i.data.type === `weapon`);
-
+// Get Weapons
+let weapons = actorD.items.filter(i => i.data.type === `weapon`);
 if(!weapons) return;
-
 let weapon_content = "";
 for (let weapon of weapons) {
   weapon_content += `
@@ -21,11 +18,6 @@ for (let weapon of weapons) {
   </label>
   `;
 }
-
-// Hemocrit Die Value and Damage Type
-let hemoDie = (4 + (2 * (Math.floor((level + 1) / 6))));
-let riteDmgType = "lightning"
-let riteDmgString = `1d${hemoDie}[${riteDmgType}]` // eg 1d4[radiant]
 
 // Updates selected weapon
 if (args[0] === "on") {
@@ -83,19 +75,49 @@ if (args[0] === "on") {
         label: 'Confirm',
         callback: async (html) => {
           let weaponId = $("input[type='radio'][name='weapon']:checked").val();
-
-          let weapon = tactor.items.get(weaponId);
-
+          let weapon = actorD.items.get(weaponId);
           let copyWeapon = foundry.utils.duplicate(weapon);
 
-          let damageDice = copyWeapon.data.damage.parts
-          damageDice.push([riteDmgString,riteDmgType])
+          let isMgc = copyWeapon.data.properties.mgc; // save current magic flag
+          copyWeapon.data.properties.mgc = true; // regardless, its now magic
 
-          await tactor.updateEmbeddedDocuments("Item", [copyWeapon])
+          copyWeapon.flags['midi-qol'].onUseMacroName = "ItemMacro"; // set the onUse to ItemMacro for this item
 
-          DAE.setFlag(tactor, 'flgRiteStorm', {
-            weaponID: weaponId
+          // update the ItemMacro (copied from a manually configured Rapier with a working ItemMacro)
+          copyWeapon.flags.itemacro = {
+            "macro": {
+                "data": {
+                    "_id": null,
+                    "name": weapon.name,
+                    "type": "script",
+                    "author": "5iqOgPLPmoUd9MiS",
+                    "img": weapon.img,
+                    "scope": "global",
+                    "command": "async function wait(ms) { return new Promise(resolve => { setTimeout(resolve, ms); }); }\nif (args[0].hitTargets[0] === undefined) return;\nconst lastArg = args[args.length - 1];\nif (lastArg.hitTargets[0].length === 0) return {};\nlet tokenD = canvas.tokens.get(lastArg.tokenId).actor;\nlet actorD = game.actors.get(lastArg.actor._id);\nconst target = canvas.tokens.get(lastArg.hitTargets[0].id);\nlet damage_type = \"lightning\";\nlet baseDie = 1;\nconst level = actorD.data.type === \"npc\" ? actorD.data.data.details.cr : actorD.classes[\"blood-hunter\"].data.data.levels;\nlet hemoDie = (4 + (2 * (Math.floor((level + 1) / 6))));\nlet critDie = 2*baseDie;\nlet attackDice = lastArg.isCritical ? `${critDie}d${hemoDie}`  : `${baseDie}d${hemoDie}`;\nlet damageRoll = new Roll(`${attackDice}`).evaluate({async:false});\ngame.dice3d?.showForRoll(damageRoll);\nnew MidiQOL.DamageOnlyWorkflow(actorD, tokenD, damageRoll.total, damage_type, [target], damageRoll, {flavor: `(${CONFIG.DND5E.damageTypes[damage_type]})`, itemCardId: lastArg.itemCardId, damageList: lastArg.damageList});",
+                    "folder": null,
+                    "sort": 0,
+                    "permission": {
+                        "default": 0
+                    },
+                    "flags": {}
+                }
+            }
+          }
+          actorD.updateEmbeddedDocuments('Item', [copyWeapon])
+          DAE.setFlag(actorD, 'flgRiteStorm', {
+            weaponID: weaponId,
+            isMagic: isMgc,
           });
+
+          // Hemocrit Die Value and Damage Type
+          const level = actorD.data.type === "npc" ? actorD.data.data.details.cr : actorD.classes["blood-hunter"].data.data.levels;
+          let hemoDie = (4 + (2 * (Math.floor((level + 1) / 6))));
+          let numDice = `1d${hemoDie}`
+          let damage_type = "lightning";
+          let damageRoll = new Roll(`${numDice}`).roll();
+
+          game.dice3d?.showForRoll(damageRoll);
+          new MidiQOL.DamageOnlyWorkflow(actorD, tokenD, damageRoll.total, damage_type, [target], damageRoll, {flavor: `(${CONFIG.DND5E.damageTypes[damage_type]})`, itemCardId: lastArg.itemCardId, damageList: lastArg.damageList});
         }
       },
     },
@@ -103,19 +125,16 @@ if (args[0] === "on") {
 }
 
 if (args[0] === "off") {
-  let flag = await DAE.getFlag(tactor, 'flgRiteStorm')
-  let { weaponID } = flag
-  let Weapon = tactor.items.get(weaponID);
+  let flag = await DAE.getFlag(actorD, 'flgRiteStorm')
+  console.log("FLAG ",flag);
+  let weapon = actorD.items.get(flag.weaponID);
+  let copyWeapon = foundry.utils.duplicate(weapon);
 
-  let copyWeapon = foundry.utils.duplicate(Weapon);
+  copyWeapon.data.properties.mgc = flag.isMagic;
+  copyWeapon.flags['midi-qol'].onUseMacroName = "";
+  delete copyWeapon.flags.itemacro;
 
-  let weaponDamageParts = copyWeapon.data.damage.parts;
-  for (let i = 0; i < weaponDamageParts.length; i++) {
-    if (weaponDamageParts[i][0] === riteDmgString && weaponDamageParts[i][1] === riteDmgType){
-      weaponDamageParts.splice(i, 1)
-      tactor.updateEmbeddedDocuments("Item", [copyWeapon]);
-      DAE.unsetFlag(tactor, `flgRiteStorm`);
-      return;
-    }
-  }
+  actorD.updateEmbeddedDocuments('Item', [copyWeapon])
+
+  DAE.unsetFlag(actorD, `flgRiteStorm`);
 }
