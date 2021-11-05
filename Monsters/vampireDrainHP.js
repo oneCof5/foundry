@@ -13,50 +13,61 @@ ground rises the following night as a vampire spawn under Strahd’s control.
 async function wait(ms) {return new Promise(resolve => {setTimeout(resolve, ms);});}
 
 if(args[0].hitTargets.length === 0) return {};
-
-let tokenD = canvas.tokens.get(args[0].tokenId);
 let actorD = game.actors.get(args[0].actor._id);
-let target  = canvas.tokens.get(args[0].hitTargets[0].id);
+let tokenD = canvas.tokens.get(args[0].tokenId);
+let targetD  = canvas.tokens.get(args[0].hitTargets[0].id);
 let itemD = args[0].item;
+let itemCiD = args[0].itemCardId;
+let damList = args[0].damageList;
 let gameRound = game.combat ? game.combat.round : 0;
-let damage_type;
+let damage_type = "necrotic";
 
-const diceMult = args[0].isCritical ? 2: 1;
-const numDice = 3 * diceMult;
-args[0].isCritical ? numDice * 2 : numDice;
-let damageRoll = new Roll(`${numDice}d6`).roll();
-game.dice3d?.showForRoll(damageRoll); // show the animated dice
+const baseDice = 3;  // Bite is 3d6
+const numDice = args[0].isCritical ? baseDice * 2 : baseDice; // double dice on crit hit
+let damageRoll = new Roll(`${numDice}d6`).roll(); // roll the damage
+game.dice3d.showForRoll(damageRoll); //brag
 
-// necrotic damage
-damage_type = "necrotic";
-new MidiQOL.DamageOnlyWorkflow(actorD, tokenD, damageRoll.total, damage_type, [target], damageRoll, {flavor: `(${CONFIG.DND5E.damageTypes[damage_type]})`, itemCardId: lastArg.itemCardId, damageList: lastArg.damageList});
+let hpNow = targetD.actor.data.data.attributes.hp.max; //current max hp
+let atkDamage = damageRoll.total; // save this attack bite damage
+let totDamage = hpNow - atkDamage;
+
+// necrotic bite damage applied to target
+new MidiQOL.DamageOnlyWorkflow(actorD, tokenD, atkDamage, damage_type, [targetD], damageRoll, {flavor: `(${CONFIG.DND5E.damageTypes[damage_type]})`, itemCardId: itemCiD, damageList: damList});
 // healing back to the vampire
-damage_type = "healing"
-await MidiQOL.applyTokenDamage([{damage: damageRoll.total, type: damage_type}], damageRoll.total, new Set([tokenD]), itemD.name, new Set());
+await MidiQOL.applyTokenDamage([{damage: atkDamage, type: "healing"}], atkDamage, new Set([tokenD]), itemD.name, new Set());
 
-// Create an Effect for this necrotic damage
-const effectData = {
-  label : "Drain",
-  icon : "icons/skills/wounds/blood-drip-droplet-red.webp",
-  origin: args[0].uuid,
-  changes: [{
-    "key": "data.attributes.hp.tempmax", //   "key": "data.attributes.hp.max",
-    "value": `-${damageRoll.total}`,
-    "mode": 2,
-    "priority": 20
-    }],
-  disabled: false,
-  duration: {seconds: 86400,startRound: gameRound, startTime: game.time.worldTime}, // expires after long rest, but for now 24h
+// Check for an existing effect. If not found, create one. If found, update total Bite damage incurred.
+const effectDataLabel = "Bitten";
+let effectData;
+let checkEffect = await targetD.actor.data.effects.find(i => i.data.label === effectDataLabel);
+if (!checkEffect) {
+  effectData = {
+    changes: [{ key: "data.attributes.hp.max", value: `${totDamage}`, mode: 5, priority: 20 }],
+    disabled: false,
+    duration: {startTime: game.time.worldTime},
+    flags: {
+      dae: { transfer: true, macroRepeat: "none", specialDuration: [] },
+      "dnd5e-helpers": { "rest-effect": "Long Rest" }
+    },
+    label : effectDataLabel,
+    origin: args[0].uuid,
+    icon : "icons/skills/wounds/blood-drip-droplet-red.webp",
+    transfer: false
+  }
+  await MidiQOL.socket().executeAsGM("createEffects", {actorUuid: targetD.actor.uuid, effects: [effectData]});
+  return
+} else if (checkEffect) {
+  effectData = {
+    _id: checkEffect.id,
+    changes: [
+      { key: "data.attributes.hp.max", value: `${totDamage}`, mode: 5, priority: 20 }
+    ]
+  }
+  await targetD.actor.updateEmbeddedDocuments('ActiveEffect', [effectData])
 }
 
-await MidiQOL.socket().executeAsGM("createEffects", {actorUuid: target.actor.uuid, effects: [effectData]});
-
 // Notify the GM
-let hpNow = target.actor.data.data.attributes.hp.max; //current max hp
-let hpNowMax = target.actor.data.data.attributes.hp.tempmax; // current tempmax hp (if previously drained, this will be negative)
-let updateHP = hpNow + hpNowMax; // total hitpoint reduction
-let the_message = `<p>${tokenD.name} drains ${target.name} of ${damageRoll.total} pts from their maximum Hit Point value!</p><p>${target.name} now has Maximum Hit Point maximum of ${updateHP}.</p><br><p><b>If it reaches ZERO, they die!!</b></p><br><p> ${tokenD.name} regains ${damageRoll.total} Hit Points back!</p>`;
-
+let the_message = `<p>${tokenD.name} drains ${targetD.name} of ${atkDamage} pts from their maximum Hit Point value!</p><p>${targetD.name} now has Maximum Hit Point maximum of ${totDamage} (reduced from ${hpNow}.</p><p><b>If ${targetD.name} reaches zero, they die!</b></p><br><p> ${tokenD.name} regains ${atkDamage} Hit Points!</p>`;
 await wait(600);
 ChatMessage.create({
   user: game.user._id,
