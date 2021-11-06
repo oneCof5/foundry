@@ -24,7 +24,7 @@ let damage_type = "necrotic";
 
 const baseDice = 3;  // Bite is 3d6
 const numDice = args[0].isCritical ? baseDice * 2 : baseDice; // double dice on crit hit
-let damageRoll = new Roll(`${numDice}d6`).roll(); // roll the damage
+let damageRoll = new Roll(`${numDice}d6[${damage_type}]`).evaluate({async:false});
 game.dice3d.showForRoll(damageRoll); //brag
 
 let hpNow = targetD.actor.data.data.attributes.hp.max; //current max hp
@@ -35,6 +35,30 @@ let totDamage = hpNow - atkDamage;
 new MidiQOL.DamageOnlyWorkflow(actorD, tokenD, atkDamage, damage_type, [targetD], damageRoll, {flavor: `(${CONFIG.DND5E.damageTypes[damage_type]})`, itemCardId: itemCiD, damageList: damList});
 // healing back to the vampire
 await MidiQOL.applyTokenDamage([{damage: atkDamage, type: "healing"}], atkDamage, new Set([tokenD]), itemD.name, new Set());
+
+// Notify the GM
+/*
+The target’s hit point maximum is reduced by an amount equal to the necrotic
+damage taken, and the vampire regains hit points equal to that amount. The reduction
+lasts until the target finishes a long rest. The target dies if its hit point
+maximum is reduced to 0.
+*/
+let hitContent = `
+<div class="midi-qol-nobox">
+  <div class="midi-qol-flex-container">
+    <div>This attack reduces ${targetD.name}'s Maximum Hit Points by ${atkDamage}.</div>
+    <div class="midi-qol-target-npc-GM"><em>The maximum hit points for ${targetD.name} have been reduced from ${hpNow} to ${totDamage} in this attack.</em></div><div class="midi-qol-target-npc-GM"><em>The reduction lasts until ${targetD.name} finishes a long rest.</em></div><div class="midi-qol-target-npc-GM"><em>${targetD.name} dies if this effect reduces its hit point maximum to 0.</em></div>
+    <div class="midi-qol-target-npc-GM"><em><b>${tokenD.name}<b> is healed for ${atkDamage}.</em></div>
+  </div>
+</div>`;
+
+await wait(600);
+let chatMessage = game.messages.get(itemCiD);
+let content = duplicate(chatMessage.data.content);
+let searchString =  /<div class="midi-qol-saves-display">[\s\S]*<div class="end-midi-qol-saves-display">/g;
+let replaceString = `<div class="midi-qol-saves-display"><div class="end-midi-qol-saves-display">${hitContent}`;
+content = content.replace(searchString, replaceString);
+chatMessage.update({content: content});
 
 // Check for an existing effect. If not found, create one. If found, update total Bite damage incurred.
 const effectDataLabel = "Bitten";
@@ -63,16 +87,5 @@ if (!checkEffect) {
       { key: "data.attributes.hp.max", value: `${totDamage}`, mode: 5, priority: 20 }
     ]
   }
-  await targetD.actor.updateEmbeddedDocuments('ActiveEffect', [effectData])
+  await targetD.actor.updateEmbeddedDocuments('ActiveEffect', [effectData]);
 }
-
-// Notify the GM
-let the_message = `<p>${tokenD.name} drains ${targetD.name} of ${atkDamage} pts from their maximum Hit Point value!</p><p>${targetD.name} now has Maximum Hit Point maximum of ${totDamage} (reduced from ${hpNow}.</p><p><b>If ${targetD.name} reaches zero, they die!</b></p><br><p> ${tokenD.name} regains ${atkDamage} Hit Points!</p>`;
-await wait(600);
-ChatMessage.create({
-  user: game.user._id,
-  speaker: ChatMessage.getSpeaker({actorD: actorD}),
-  content: the_message,
-  whisper: game.users.entities.filter(u => u.isGM).map(u => u._id),
-  type: CONST.CHAT_MESSAGE_TYPES.EMOTE
-  });
