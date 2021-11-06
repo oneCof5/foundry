@@ -1,3 +1,20 @@
+/*
+MidiQOL OnUse Macro or ItemMacro
+Feature of Blood hunter
+Crimson Rite. As a bonus action, you can activate a crimson rite on a single
+  weapon with the elemental energy of a known rite of your choice that lasts
+  until you finish a short or long rest, or if you aren’t holding the weapon
+  at the end of your turn. When you activate a rite, you lose a number of hit
+  points equal to one roll of your hemocraft die, as shown in the Hemocraft Die
+  column of the Blood Hunter table.
+  For the duration, attacks from this weapon deal additional damage of the
+    chosen rite’s type. This damage is magical, and increases as you gain levels
+    as a blood hunter, as shown in the Hemocraft Die column of the Blood Hunter
+    table. A weapon can only hold a single active rite at a time.
+  Hemocraft Die by Level
+  1-4: 1d4 | 5-10: 1d6 | 11-16: 1d8 | 17+: 1d10
+*/
+
 const lastArg = args[args.length - 1];
 let actorD;
 if (lastArg.tokenId) actorD = canvas.tokens.get(lastArg.tokenId).actor;
