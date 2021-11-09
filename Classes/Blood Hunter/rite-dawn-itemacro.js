@@ -1,24 +1,17 @@
-/*
-ItemMacro attached to the actual item the Rite of Dawn has been applied to via the rite-dawn.js and DAE effect
-*/
+//  Midi-QOL OnUse macro from the weapon making the attack.
 async function wait(ms) { return new Promise(resolve => { setTimeout(resolve, ms); }); }
 const lastArg = args[args.length - 1];
-if (lastArg.hitTargets[0].length === 0) return {};
+if (lastArg.hitTargets[0] === undefined) return {};
 let tokenD = canvas.tokens.get(lastArg.tokenId).actor;
 let actorD = game.actors.get(lastArg.actor._id);
-const targetD = canvas.tokens.get(lastArg.hitTargets[0].id);
-// Rite of Dawn deals additional damage to undead. Is the target 'undead'
-const undead = targetD.actor.data.type === "npc" ? ["undead"].some(value => (targetD.actor.data.data.details.type.value || "").toLowerCase().includes(value)) : ["undead"].some(race => (targetD.actor.data.data.details.race || "").toLowerCase().includes(race));
-
-// determine hemocrit die that scales by Blood Hunter level
+const target = canvas.tokens.get(lastArg.hitTargets[0].id);
+const undead = target.actor.data.type === "npc" ? ["undead"].some(value => (target.actor.data.data.details.type.value || "").toLowerCase().includes(value)) : ["undead"].some(race => (target.actor.data.data.details.race || "").toLowerCase().includes(race));
+const damage_type = "radiant";
 const level = actorD.data.type === "npc" ? actorD.data.data.details.cr : actorD.classes["blood-hunter"].data.data.levels;
-let hemoDie = (4 + (2 * (Math.floor((level + 1) / 6)))); // 5 (d6), 11 (d8), 17 (d10)
+const hemoDie = (4 + (2 * (Math.floor((level + 1) / 6))));
 let baseDie = 1;
-let damage_type = "radiant";
-
-if(undead) { baseDie += 1;} // if we hit an undead, roll another
-let numDice = lastArg.isCritical ? 2 * baseDie : baseDie;
+if ( undead ) { baseDie += 1;}
+const numDice = lastArg.isCritical ? 2 * baseDie : baseDie;
 let damageRoll = new Roll(`${numDice}d${hemoDie}`).evaluate({async:false});
-game.dice3d.showForRoll(damageRoll); // show the animated dice
-// pass to Midi-QOL
-new MidiQOL.DamageOnlyWorkflow(actorD, tokenD, damageRoll.total, damage_type, [targetD], damageRoll, {flavor: `(${CONFIG.DND5E.damageTypes[damage_type]})`, itemCardId: lastArg.itemCardId, damageList: lastArg.damageList});
+game.dice3d?.showForRoll(damageRoll);
+new MidiQOL.DamageOnlyWorkflow(actorD, tokenD, damageRoll.total, damage_type, [target], damageRoll, {flavor: `(${CONFIG.DND5E.damageTypes[damage_type]})`, itemCardId: lastArg.itemCardId, damageList: lastArg.damageList});
