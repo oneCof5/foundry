@@ -12,7 +12,7 @@ ground rises the following night as a vampire spawn under Strahd’s control.
 */
 async function wait(ms) {return new Promise(resolve => {setTimeout(resolve, ms);});}
 
-if(args[0].hitTargets.length === 0) return {};
+if(args[0].hitTargets[0] === undefined) return {};
 let actorD = game.actors.get(args[0].actor._id);
 let tokenD = canvas.tokens.get(args[0].tokenId);
 let targetD  = canvas.tokens.get(args[0].hitTargets[0].id);
@@ -43,14 +43,7 @@ damage taken, and the vampire regains hit points equal to that amount. The reduc
 lasts until the target finishes a long rest. The target dies if its hit point
 maximum is reduced to 0.
 */
-let hitContent = `
-<div class="midi-qol-nobox">
-  <div class="midi-qol-flex-container">
-    <div>This attack reduces ${targetD.name}'s Maximum Hit Points by ${atkDamage}.</div>
-    <div class="midi-qol-target-npc-GM"><em>The maximum hit points for ${targetD.name} have been reduced from ${hpNow} to ${totDamage} in this attack.</em></div><div class="midi-qol-target-npc-GM"><em>The reduction lasts until ${targetD.name} finishes a long rest.</em></div><div class="midi-qol-target-npc-GM"><em>${targetD.name} dies if this effect reduces its hit point maximum to 0.</em></div>
-    <div class="midi-qol-target-npc-GM"><em><b>${tokenD.name}<b> is healed for ${atkDamage}.</em></div>
-  </div>
-</div>`;
+let hitContent = `<div class="midi-qol-nobox"><div class="midi-qol-flex-container"><div>This attack reduces ${targetD.name}'s Maximum Hit Points by ${atkDamage}.</div><div class="midi-qol-target-npc-GM"><em>The maximum hit points for ${targetD.name} have been reduced from ${hpNow} to ${totDamage} in this attack.</em></div><div class="midi-qol-target-npc-GM"><em>The reduction lasts until ${targetD.name} finishes a long rest.</em></div><div class="midi-qol-target-npc-GM"><em>${targetD.name} dies if this effect reduces its hit point maximum to 0.</em></div><div class="midi-qol-target-npc-GM"><em><b>${tokenD.name}<b> is healed for ${atkDamage}.</em></div></div></div>`;
 
 await wait(600);
 let chatMessage = game.messages.get(itemCiD);
