@@ -12,6 +12,6 @@ const hemoDie = (4 + (2 * (Math.floor((level + 1) / 6))));
 let baseDie = 1;
 if ( undead ) { baseDie += 1;}
 const numDice = lastArg.isCritical ? 2 * baseDie : baseDie;
-let damageRoll = new Roll(`${numDice}d${hemoDie}`).evaluate({async:false});
+let damageRoll = new Roll(`${numDice}d${hemoDie}[${damage_type}]`).evaluate({async:false});
 game.dice3d?.showForRoll(damageRoll);
 new MidiQOL.DamageOnlyWorkflow(actorD, tokenD, damageRoll.total, damage_type, [target], damageRoll, {flavor: `(${CONFIG.DND5E.damageTypes[damage_type]})`, itemCardId: lastArg.itemCardId, damageList: lastArg.damageList});
