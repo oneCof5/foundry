@@ -1,4 +1,5 @@
 //DAE Macro Execute, Effect Value = "Macro Name" @target @item.level // @target @spellLevel
+// this macro creates an attack in the PCs inventory.
 const lastArg = args[args.length - 1];
 let item = lastArg.efData.flags.dae.itemData;
 let actorD;

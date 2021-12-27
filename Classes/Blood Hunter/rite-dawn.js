@@ -49,6 +49,7 @@ if (args[0] === "on") {
         callback: async (html) => {
 /*
 // remove any preexisting Crimson Rite effects
+// cant run this here because it removes the effect applied at the start of this call by dae
           const riteEffects = ["Crimson Rite of the Dawn","Crimson Rite of the Storm"];
           let activeRites = target.actor.effects.filter(i => riteEffects.includes(i.data.label));
           console.log("DEBUG activeRites", activeRites);
@@ -64,17 +65,22 @@ if (args[0] === "on") {
           let copyWeapon = await foundry.utils.duplicate(weapon);
           const weaponName = copyWeapon.name;
           const isMgc = copyWeapon.data.properties.mgc;
+          const origOnUse = copyWeapon.flags["midi-qol"].onUseMacroName;
+          let newOnUse = "[postActiveEffects]rite-dawn-weapon-attack," + origOnUse;
+          console.log("ORIG ON USE: ",origOnUse);
+          console.log("NEW ON USE: ",newOnUse);
 
           // update values
           copyWeapon.name = `${weaponName} (Rite of the Dawn)`;
           copyWeapon.data.properties.mgc = true;
-          copyWeapon.flags["midi-qol"] = { onUseMacroName: "rite-dawn-weapon-attack" };
+          copyWeapon.flags["midi-qol"].onUseMacroName = newOnUse;
 
           await actorD.updateEmbeddedDocuments('Item', [copyWeapon]);
           DAE.setFlag(actorD, 'flgRiteDawn', {
             wId: weaponId,
             isMagic: isMgc,
-            wName: weaponName
+            wName: weaponName,
+            wMidiQOL: origOnUse
           });
 
           // The Blood Hunter damages themselves
@@ -82,7 +88,7 @@ if (args[0] === "on") {
           const hemoDie = (4 + (2 * (Math.floor((level + 1) / 6))));
           const damage_type = "radiant";
           let damageRoll = new Roll(`1d${hemoDie}`).evaluate({async:false});
-          game.dice3d?.showForRoll(damageRoll);
+//          game.dice3d?.showForRoll(damageRoll);
           await new MidiQOL.DamageOnlyWorkflow(actorD, tokenD, damageRoll.total, damage_type, [target], damageRoll, {flavor: `(${CONFIG.DND5E.damageTypes[damage_type]})`, itemCardId: lastArg.itemCardId, damageList: lastArg.damageList});
         }
       },
@@ -98,7 +104,7 @@ if (args[0] === "off") {
   // update values
   copyWeapon.name = `${flag.wName}`;
   copyWeapon.data.properties.mgc = flag.isMagic;
-  copyWeapon.flags["midi-qol"] = { onUseMacroName: null };
+  copyWeapon.flags["midi-qol"].onUseMacroName = flag.wMidiQOL ;
 
   await actorD.updateEmbeddedDocuments('Item', [copyWeapon]);
   DAE.unsetFlag(actorD, `flgRiteDawn`);
