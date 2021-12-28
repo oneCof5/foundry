@@ -64,17 +64,22 @@ if (args[0] === "on") {
           let copyWeapon = await foundry.utils.duplicate(weapon);
           const weaponName = copyWeapon.name;
           const isMgc = copyWeapon.data.properties.mgc;
+          const origOnUse = copyWeapon.flags["midi-qol"].onUseMacroName;
+          let newOnUse = "[postActiveEffects]rite-dawn-weapon-attack," + origOnUse;
+//          console.log("ORIG ON USE: ",origOnUse);
+//          console.log("NEW ON USE: ",newOnUse);
 
           // update values
           copyWeapon.name = `${weaponName} (Rite of the Storm)`;
           copyWeapon.data.properties.mgc = true;
-          copyWeapon.flags["midi-qol"] = { onUseMacroName: "rite-storm-weapon-attack" };
+          copyWeapon.flags["midi-qol"].onUseMacroName = newOnUse;
 
           await actorD.updateEmbeddedDocuments('Item', [copyWeapon]);
           DAE.setFlag(actorD, 'flgRiteStorm', {
             wId: weaponId,
             isMagic: isMgc,
-            wName: weaponName
+            wName: weaponName,
+            wMidiQOL: origOnUse
           });
 
           // The Blood Hunter damages themselves
@@ -98,7 +103,7 @@ if (args[0] === "off") {
   // update values
   copyWeapon.name = `${flag.wName}`;
   copyWeapon.data.properties.mgc = flag.isMagic;
-  copyWeapon.flags["midi-qol"] = { onUseMacroName: null };
+  copyWeapon.flags["midi-qol"] = flag.wMidiQOL;
 
   await actorD.updateEmbeddedDocuments('Item', [copyWeapon]);
   DAE.unsetFlag(actorD, `flgRiteStorm`);

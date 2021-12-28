@@ -67,8 +67,8 @@ if (args[0] === "on") {
           const isMgc = copyWeapon.data.properties.mgc;
           const origOnUse = copyWeapon.flags["midi-qol"].onUseMacroName;
           let newOnUse = "[postActiveEffects]rite-dawn-weapon-attack," + origOnUse;
-          console.log("ORIG ON USE: ",origOnUse);
-          console.log("NEW ON USE: ",newOnUse);
+//          console.log("ORIG ON USE: ",origOnUse);
+//          console.log("NEW ON USE: ",newOnUse);
 
           // update values
           copyWeapon.name = `${weaponName} (Rite of the Dawn)`;
