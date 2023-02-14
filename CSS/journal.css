@@ -1,0 +1,104 @@
+.window-app.sheet.journal-sheet.journal-entry {
+  font-family: Roboto, Helvetica, sans-serif;
+}
+
+.window-app.sheet.journal-sheet.journal-entry section.journal-entry-content,
+.window-app.sheet.journal-sheet.journal-entry-page section {
+	background: url(https://assets.forge-vtt.com/61c6079e99b8eb56f3ca7ede/css/images/background_texture.png) repeat;
+}
+
+.window-app.sheet.journal-sheet section.window-content h1,
+.window-app.sheet.journal-sheet section.window-content h2,
+.window-app.sheet.journal-sheet section.window-content h3,
+.window-app.sheet.journal-sheet section.window-content h4,
+.window-app.sheet.journal-sheet section.window-content h5,
+.window-app.sheet.journal-sheet section.window-content h6 {
+	font-family: "Roboto Condensed", Helvetica, sans-serif;
+}
+
+.window-app.sheet.journal-sheet section.window-content h1 {
+	font-size: 36px;
+	line-height: 1.3;
+	margin: 0 0 0.2em;
+}
+
+.window-app.sheet.journal-sheet section.window-content h2 {
+	font-size: 24px;
+	line-height: 1.3;
+	margin: 0;
+}
+
+.window-app.sheet.journal-sheet section.window-content h3 {
+	font-size: 1.3em;
+}
+
+.window-app.sheet.journal-sheet section.window-content h4,
+.window-app.sheet.journal-sheet section.window-content h5,
+.window-app.sheet.journal-sheet section.window-content h6 {
+	font-size: 1em;
+	font-weight: bold;
+}
+
+aside.block-torn-paper,
+aside.epigraph,
+aside.epigraph-with--author {
+  overflow: auto;
+  background: #fff;
+  color: #242527;
+  margin: 40px 0;
+  line-height: 1.6;
+  font-size: 14px;
+  border: solid transparent;
+  border-width: 20px 10px;
+  border-image-source: url(https://assets.forge-vtt.com/61c6079e99b8eb56f3ca7ede/css/images/epigraph.png);
+  border-image-repeat: repeat;
+  border-image-slice: 20 10 20 10 fill;
+  padding: 10px;
+  position: relative;
+}
+
+aside.epigraph-with--author p:last-child{
+	font-style: italic;
+	text-align: right;
+}
+
+aside.rules-text {
+  overflow: auto;
+  display: block;
+  margin: 30px 0;
+  line-height: 1.6;
+  font-size: 14px;
+  color: #242527;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 15px 20px;
+  border-image-repeat: repeat;
+  border-image-slice: 20 30 20 30 fill;
+  background-color: transparent;
+  padding: 20px 10px 10px;
+  position: relative;
+  border-image-source: url(https://assets.forge-vtt.com/61c6079e99b8eb56f3ca7ede/css/images/quotebox_reference_rose.png);
+  -webkit-filter: drop-shadow(0 5px 8px #ccc);
+  filter: drop-shadow(0 5px 8px #ccc);
+}
+
+aside.rules-text p:first-child {
+	text-transform: uppercase;
+	font-weight: 700;
+}
+
+aside.read-aloud-text {
+  overflow: auto;
+  display: block;
+  margin: 30px 0;
+  line-height: 1.6;
+  font-size: 14px;
+  color: var(--theme-read-aloud-fg-color,#242527);
+  border: 8px solid transparent;
+  border-image-repeat: repeat;
+  border-image-slice: 8 8 8 8 fill;
+  background-color: transparent;
+  padding: 20px 20px 10px !important;
+  position: relative;
+  border-image-source: url(https://assets.forge-vtt.com/61c6079e99b8eb56f3ca7ede/css/images/read-aloud-cos.png);
+}
