@@ -1,86 +1,67 @@
-/*
-provided by siliconsaint for honeybadger's warpgate v1.5.0
-https://github.com/trioderegion/warpgate
-Called via DAE Macro.Execute spiritual-weapon @target @spellLevel
-1. Summon the Spiritual Weapon token (named Rose)
-2. Update the SW token's attack modifier to use the caster's spell attack. Remove the token's CR proficiency and any attribute mod (so it only uses the caster's)
-3. Update the SW token's damage to use upcast and the spell casting mod of the caster.
-4. Restore when the DAE effect ends.
-*/
-// console.log(args);
-const lastArg = args[args.length -1];
-const actorD = game.actors.get(lastArg.actorId);
-const tokenD = canvas.tokens.get(lastArg.tokenId);
-const level = args[2];
-let summonType = "Rose";
-// console.log("SPELL ATTRIBUTES", actorD.data.data.attributes);
-const summonerDc = actorD.data.data.attributes.spelldc;
-// console.log("SUMMONER DC", summonerDc);
-const summonerAttack = summonerDc - 8;
-// console.log("SUMMONER ATTACK", summonerAttack);
-const summonerMod = getProperty(tokenD.actor, `data.data.abilities.${getProperty(tokenD.actor, 'data.data.attributes.spellcasting')}.mod`);
-// console.log("SUMMONER MOD", summonerMod);
-let damageScale = '';
-
-if ((level-3) > 0){
-    damageScale = `+ ${Math.floor((level-2)/2)}d8[force]`;
-}
-
-let updates = {
-  embedded: { Item: {
-    "Attack":{
-      'data.attackBonus': `${summonerAttack} - @mod - @prof`,
-      'data.damage.parts': [[`1d8[force] ${damageScale} + ${summonerMod}`, 'force']]
-    }
-  }}
-};
-
-async function myEffectFunction(template, update) {
-  //prep summoning area
-  let effect = '';
-
-  new Sequence()
-    .effect()
-      .file(effect)
-      .atLocation(template)
-      .center()
-      .JB2A()
-      .scale(1.5)
-      .belowTokens()
-    .play()
-}
-
-async function postEffects(template, token) {
-  //bring in our minion
-  new Sequence()
-    .animation()
-      .on(token)
-        .fadeIn(500)
-    .play()
-}
-
-const callbacks = {
-/*
-pre: async (template, update) => {
-    myEffectFunction(template,update);
-    await warpgate.wait(1750);
-  },
-*/
-  post: async (template, token) => {
-    postEffects(template,token);
-    await warpgate.wait(500);
+const version = '10.0.13';
+try {
+  const origin = args[0].itemUuid;
+  if (origin) {
+      const removeList = actor.effects.filter(ae => ae.origin === origin && getProperty(ae, 'flags.dae.transfer') !== 3).map(ae=>ae.id);
+      await actor.deleteEmbeddedDocuments('ActiveEffect', removeList)
   }
-};
 
-const options = {controllingActor: actor};
+  let casterSpellMod = args[0].actor.system.abilities[args[0].actor.system.attributes.spellcasting]?.mod;
+  casterSpellMod =Number.isNaN(Number(casterSpellMod)) ? await parseBonuses(casterSpellMod) : Number(casterSpellMod) ;
+  let casterProf = args[0].actor.system.attributes.prof;
+  casterProf = Number.isNaN(Number(casterProf)) ? await parseBonuses(casterProf) : Number(casterProf) ;
+  let casterSpellAttack = args[0].actor.system.bonuses.msak.attack;
+  casterSpellAttack = Number.isNaN(Number(casterSpellAttack)) ? await parseBonuses(casterSpellAttack) : Number(casterSpellAttack) ;
 
-if (args[0] === "on") {
-  let mySpawn = await warpgate.spawn(summonType, updates, callbacks, options);
-  DAE.setFlag(actorD, 'spiritual-weapon', { tokenId: mySpawn[0] });
+  const casterAttackBonus = casterSpellMod + casterProf + casterSpellAttack;
+  const casterDamageBonus = casterSpellMod || '';
+  const numDice = 1 + Math.floor((args[0].spellLevel-2)/2);
+  const damagePart = casterDamageBonus ? `${numDice}d8[force] + ${casterDamageBonus}` : `${numDice}d8[force]`; 
+  const updates = {
+    Item: {
+      'Spiritual Weapon Attack': {
+        'type': 'weapon',
+        'img': args[0].itemData.img, 
+        'system': {
+          'equipped': true,
+          'identified': true,
+          'target': {'value': 1,'type': 'creature'},
+          'range.units': 'touch',
+          'actionType': 'msak',
+          'attackBonus': `${casterAttackBonus}`,
+          'damage.parts': [[`${damagePart}`,'force']],
+          'weaponType': 'simpleM',
+          'properties.mgc': true,
+          'proficient': false
+        }
+      }
+    }
+  }
+
+  const result = await warpgate.spawn('Rose',  {embedded: updates}, {}, {});
+  if (result.length !== 1) return;
+  const createdToken = game.canvas.tokens.get(result[0]);
+  await createdToken.actor.items.getName('Spiritual Weapon Attack').update({'data.proficient': false});
+  const targetUuid = createdToken.document.uuid;
+
+  await actor.createEmbeddedDocuments('ActiveEffect', [{
+      label: 'Summon', 
+      icon: args[0].item.img, 
+      origin,
+      duration: {seconds: 60, rounds:10},
+      'flags.dae.stackable': false,
+      changes: [{key: 'flags.dae.deleteUuid', mode: CONST.ACTIVE_EFFECT_MODES.ADD, value: [targetUuid]}]
+  }]);
+} catch (err) {
+    console.error(`${args[0].itemData.name} - SPIRITUAL WEAPON ${version}`, err);
 }
 
-if (args[0] === "off") {
-  const flag = await DAE.getFlag(actorD, 'spiritual-weapon');
-  await warpgate.dismiss(flag.tokenId);
-  DAE.unsetFlag(actorD, 'spiritual-weapon');
+async function parseBonuses (bonus) {
+  let flavorRemoved = bonus.replace(/\[(.*?)\]/g,''); // strip out the [desc] tags in the source
+  let dirtyArr = flavorRemoved.split('+'); // convert to an array using the + symbol e.g +1 + 2 + 3 becomes an array of [1,2,3]
+  let cleanedArr = dirtyArr.join('').split(''); // remove the invalid items (non numbers)
+  let newBonus = cleanedArr.reduce(function(total,num) {
+    return parseInt(total)+parseInt(num);
+  });
+  return newBonus;
 }

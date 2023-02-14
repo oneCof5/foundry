@@ -1,0 +1,82 @@
+{
+    "name": "Argynvost's Fury",
+    "type": "feat",
+    "img": "icons/creatures/reptiles/dragon-winged-blue.webp",
+    "effects": [
+        {
+            "changes": [
+                {
+                    "key": "ATL.light.animation",
+                    "mode": 5,
+                    "value": "{'type':'ghost','speed':3,'intensity':5}",
+                    "priority": 50
+                },
+                {
+                    "key": "ATL.light.dim",
+                    "mode": 4,
+                    "value": "5",
+                    "priority": 50
+                },
+                {
+                    "key": "ATL.light.alpha",
+                    "mode": 5,
+                    "value": "0.5",
+                    "priority": 20
+                },
+                {
+                    "key": "ATL.light.bright",
+                    "mode": 4,
+                    "value": "1",
+                    "priority": 20
+                },
+                {
+                    "key": "ATL.light.color",
+                    "mode": 5,
+                    "value": "#80f6ff",
+                    "priority": 20
+                }
+            ],
+            "disabled": false,
+            "icon": "icons/creatures/reptiles/dragon-winged-blue.webp",
+            "label": "Argynvost's Fury",
+            "transfer": false,
+            "flags": {
+                "dae": {
+                    "selfTarget": false,
+                    "stackable": "none",
+                    "specialDuration": [
+                        "turnStartSource"
+                    ],
+                    "transfer": false,
+                    "durationExpression": "",
+                    "macroRepeat": "none"
+                }
+            }
+        }
+    ],
+    "system": {
+        "description": {
+            "value": "<p>When you score a critical hit with this weapon, the ornate dragon carving on the hilt animates and breathes holy fire along the blade, which then explodes outward from the wielder. The flames dispel any magical darkness within 30 feet of you. Each creature that is an aberration, fiend or undead within 30 feet of you must make a Constitution saving throw using your spell DC. On failed save, that creature takes 25 (10d4) radiant damage and emits dim light in a 5 ft. radius until the start of your next turn. On a successful save, the creature takes half as much damage and does not emit light.</p>"
+        },
+        "activation": {
+            "type": "special"
+        },
+        "duration": {
+            "units": "inst"
+        },
+        "actionType": "save",
+        "damage": {
+            "parts": [
+                [
+                    "10d4[radiant]",
+                    "radiant"
+                ]
+            ]
+        },
+        "save": {
+            "ability": "con",
+            "dc": null,
+            "scaling": "spell"
+        }
+    }
+}
