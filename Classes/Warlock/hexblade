@@ -1,0 +1,23 @@
+// this catches the master effect after application and changes its name.
+this.registerFlowStep("modifyMasterEffect", true, async (activation) => {
+  // must run in a closure because new UUIDs are only valid after the flow is complete.
+  game.wire.runInQueue(async (activation) => {
+    const masterEffect = await fromUuid(activation.data.masterEffectUuid);
+    console.log(masterEffect);
+
+    const newName = "Hexblade's Curse Origin";
+    const newDescription = "This creature has cursed another creature.";
+    await masterEffect.update({
+      label: newName,
+      "flags.convenientDescription": newDescription,
+    });
+  }, activation);
+});
+
+return this.applyDurationEffect(
+  this.applySelectedTargets(
+    this.applyDefaultTargetsAsEffective(
+      this.applyEffects(this.performCustomStep("modifyMasterEffect"))
+    )
+  )
+);
