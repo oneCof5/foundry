@@ -103,3 +103,31 @@ async function postEffects(location, spawnedTokenD) {
     .startTime(400);
   seq.play()
 }
+
+/*
+if(!token) return;
+const macroToken = token;
+const rendered = macroToken.actor.sheet.rendered;
+if(rendered) macroToken.actor.sheet.close();
+const creatureArray = ["Rat", "Owl", "Mastiff", "Goat", "Giant Goat", "Giant Boar", "Lion", "Brown Bear"];
+const roll = await new Roll(`1d8`).evaluate({async: true});
+const creatureIndex = roll.total - 1;
+const creatureName = creatureArray[creatureIndex];
+const key = "my-compendia-module.beast-actors";
+const pack = game.packs.get(key);
+const creatureId = pack.index.getName(creatureName)._id;
+const creatureDoc = await pack.getDocument(creatureId);
+let creatureData = creatureDoc.toObject();
+let tokenData = await creatureDoc.getTokenDocument();
+if(creatureData.prototypeToken.randomImg){
+    const randomImgArray = await creatureDoc.getTokenImages();
+    tokenData.texture.src = randomImgArray[Math.floor(Math.random() * randomImgArray.length)];
+}
+tokenData.actorId = game.actors.getName("Bag of Tricks Template").id;
+
+await roll.toMessage({flavor: `<h3>${macroToken.actor.name} takes a fuzzy ball from the bag and it turns into a ${creatureName}</h3>`, speaker: ChatMessage.getSpeaker(actor)});
+
+await warpgate.spawn("Bag of Tricks Template", {actor: creatureData, token: tokenData});
+await warpgate.wait(2000);
+if(rendered) macroToken.actor.sheet.render(true);
+*/

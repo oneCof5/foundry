@@ -1,0 +1,140 @@
+{
+  "id": "peashooter-ddb-content",
+  "name": "peashooter-ddb-content",
+  "title": "Peashooter's DDB Content",
+  "description": "<p>The content Peashooter owns on D&amp;D Beyond</p>\n <br/><div style=\"border: 1px solid #eee;border-left-width: .25rem;border-left-color: #f0ad4e;border-radius: .25rem;padding: 10px;\">\n        <h5 style=\"margin:0px;\">Shared Compendium</h5>\n        <p style=\"margin-bottom:0px;\">This module allows you to share compendiums between your worlds.</p>\n        <p style=\"margin-bottom:0px;\">It cannot be auto-updated, therefore it cannot overwrite your compendiums and is therefore <strong>safe to unlock</strong>.</p></div>",
+  "version": "1.0",
+  "minimumCoreVersion": "10",
+  "compatibleCoreVersion": "10",
+  "compatibility": {
+    "minimum": "10",
+    "verified": "10"
+  },
+  "author": "Peashooter",
+  "authors": [
+    {
+      "name": "Peashooter"
+    }
+  ],
+  "packs": [
+    {
+      "entity": "Actor",
+      "type": "Actor",
+      "name": "monsters-ddb",
+      "label": "DDB Monsters",
+      "path": "packs/monsters-ddb.db",
+      "package": "peashooter-ddb-content"
+    },
+    {
+      "entity": "Actor",
+      "type": "Actor",
+      "name": "vehicles-ddb",
+      "label": "DDB Vehicles",
+      "path": "packs/vehicles-ddb.db",
+      "package": "peashooter-ddb-content"
+    },
+    {
+      "type": "Adventure",
+      "entity": "Adventure",
+      "label": "DDB Adventures",
+      "name": "adventures-ddb",
+      "path": "packs/adventures-ddb.db",
+      "package": "peashooter-ddb-content"
+    },
+    {
+      "entity": "Item",
+      "type": "Item",
+      "name": "backgrounds-ddb",
+      "label": "DDB Backgrounds",
+      "path": "packs/backgrounds-ddb.db",
+      "package": "peashooter-ddb-content"
+    },
+    {
+      "entity": "Item",
+      "type": "Item",
+      "name": "classes-ddb",
+      "label": "DDB Classes",
+      "path": "packs/classes-ddb.db",
+      "package": "peashooter-ddb-content"
+    },
+    {
+      "entity": "Item",
+      "type": "Item",
+      "name": "class-features-ddb",
+      "label": "DDB Class Features",
+      "path": "packs/class-features-ddb.db",
+      "package": "peashooter-ddb-content"
+    },
+    {
+      "entity": "Item",
+      "type": "Item",
+      "name": "subclasses-ddb",
+      "label": "DDB Subclasses",
+      "path": "subclasses-ddb.db",
+      "package": "peashooter-ddb-content"
+    },
+    {
+      "entity": "Item",
+      "type": "Item",
+      "name": "feats-ddb",
+      "label": "DDB Feats",
+      "path": "packs/feats-ddb.db",
+      "package": "peashooter-ddb-content"
+    },
+    {
+      "entity": "Item",
+      "type": "Item",
+      "name": "items-ddb",
+      "label": "DDB Items",
+      "path": "packs/items-ddb.db",
+      "package": "peashooter-ddb-content"
+    },
+    {
+      "name": "races=ddb",
+      "label": "DDB Races",
+      "path": "packs/races-ddb.db",
+      "entity": "Item",
+      "type": "Item",
+      "package": "peashooter-ddb-content"
+    },
+    {
+      "entity": "Item",
+      "type": "Item",
+      "name": "racial-traits-ddb",
+      "label": "DDB Racial Traits",
+      "path": "packs/racial-traits-ddb.db",
+      "package": "peashooter-ddb-content"
+    },
+    {
+      "entity": "Item",
+      "type": "Item",
+      "name": "spells-ddb",
+      "label": "DDB Spells",
+      "path": "packs/spells-ddb.db",
+      "package": "peashooter-ddb-content"
+    },
+    {
+      "entity": "Item",
+      "type": "Item",
+      "name": "override-ddb",
+      "label": "DDB Override",
+      "path": "packs/override-ddb.db",
+      "package": "peashooter-ddb-content"
+    },
+    {
+      "type": "RollTable",
+      "entity": "RollTable",
+      "label": "DDB Tables",
+      "name": "rolltable-ddb",
+      "path": "packs/rolltable-ddb.db",
+      "package": "peashooter-ddb-content"
+    }
+  ],
+  "relationships": {
+    "systems": [
+      {
+        "id": "dnd5e"
+      }
+    ]
+  }
+}

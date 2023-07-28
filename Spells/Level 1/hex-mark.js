@@ -1,54 +1,60 @@
-// onUse macro
-const version = "0.9.52";
-try {
-    const lastArg =  = args[args.length - 1];
-    const level = lastArg.spellLevel;
-    const hours = level === 3 ? 480 : level === 4 ? 480 : level >= 5 ? 1440 : 60;
-    const seconds = level === 3 ? 28800 : level === 4 ? 28800 : level >= 5 ? 86400 : 3600;
-    const gameRound = game.combat ? game.combat.round : 0;
+console.log("HexMove -- this:", this);
 
-    if (args[0].hitTargets.length === 0) return;
+const chris = {
+  'findEffect': function _findEffect(actor, name) {
+    return actor.effects.find(eff => eff.label === name);
+  },
+  'createEffect': async function _createEffect(actor, effectData) {
+    await actor.createEmbeddedDocuments('ActiveEffect', [effectData]);
+  },
+  'removeEffect': async function _removeEffect(effect) {
+    await effect.delete();
+  },
 
-    if (args[0].tag === "OnUse") {
-      console.log("args passed to OnUse as args[0]", args[0]);
-      // Sample Hunters mark
-        let targetUuid = args[0].hitTargets[0].uuid;
-        let actor = await MidiQOL.MQfromActorUuid(args[0].actorUuid); // actor who cast the spell
-    
-        if (!actor || !targetUuid) {
-          console.error("Hunter's Mark: no token/target selected");
-          return;
-        }
-        // create an active effect, 
-        //  one change showing the hunter's mark icon on the caster
-        //  the second setting the flag for the macro to be called when damaging an opponent
-     
-        const effectData = {
-          changes: [
-            {key: "flags.midi-qol.hexxedMark", mode: 5, value: targetUuid, priority: 20}, // who is marked
-            {key: "flags.dnd5e.DamageBonusMacro", mode: 0, value: `ItemMacro.${args[0].item.name}`, priority: 20} // macro to apply the damage
-          ],
-    
-          origin: args[0].itemUuid, //flag the effect as associated to the spell being cast
-          disabled: false,
-          duration: args[0].item.effects[0].duration,
-          icon: args[0].item.img,
-          label: args[0].item.name
-        }
-        effectData.duration.startTime = game.time.worldTime;
-        await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
-    } else if (args[0].tag === "DamageBonus") {
-        console.log("args passed toDamageBonus as args[0]", args[0]);
-        // if (!["mwak","rwak"].includes(args[0].item.data.actionType)) return {};
-        let targetUuid = args[0].hitTargets[0].uuid;
-        // only on the marked target
-        console.log(getProperty(args[0].actor.flags, "midi-qol.hexxedMark"));
-        if (targetUuid !== getProperty(args[0].actor.flags, "midi-qol.hexxedMark")) return {};
-        let damageType = args[0].item.data.damage.parts[0][1];
-        console.log(damageType);
-        const diceMult = args[0].isCritical ? 2: 1;
-        return {damageRoll: `${diceMult}d6[${damageType}]`, flavor: "Hex Damage"}
-    }
-} catch (err)  {
-    console.error(`${args[0].itemData.name} - Hex ${version}`, err);
+  'updateEffect': async function _updateEffect(effect, updates) {
+    await effect.update(updates);
+  }
+};
+
+if (this.targets.size != 1) return;
+const actor = this.actor;
+const oldTargetTokenId = actor.flags.world?.spell?.hex;
+const oldTargetToken = canvas.scene.tokens.get(oldTargetTokenId);
+let oldTargetOrigin;
+let selection = 'flags.wire.disadvantage.ability.check.str'; // default to STR
+if (oldTargetToken) {
+  let oldTargetActor = oldTargetToken.actor;
+  let oldTargetEffect =  chris.findEffect(oldTargetActor, 'Hexed');
+  if (oldTargetEffect) {
+    await chris.removeEffect(oldTargetEffect);
+    oldTargetOrigin = oldTargetEffect.origin;
+    selection = oldTargetEffect.changes[0].key;
+  }
+}
+let effect = chris.findEffect(actor, 'Hex');
+const duration = (effect) ? effect.duration.remaining : 3600;
+let targetToken = this.targets.first();
+let targetActor = targetToken.actor;
+let effectData = {
+	'label': 'Hexed',
+	'icon': 'icons/magic/perception/silhouette-stealth-shadow.webp',
+	'origin': oldTargetOrigin,
+	'duration': {
+		'seconds': duration
+	},
+	'changes': [
+		{
+			'key': selection,
+			'mode': 5,
+			'value': '1',
+			'priority': 20
+		}
+	]
+};
+await chris.createEffect(targetActor, effectData);
+if (effect) {
+    let changes = effect.changes;
+    changes[0].value = targetToken.id;
+    let updates = {changes};
+    await chris.updateEffect(effect, updates);
 }

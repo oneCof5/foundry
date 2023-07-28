@@ -2,46 +2,98 @@
   font-family: Roboto, Helvetica, sans-serif;
 }
 
+.window-app.sheet.journal-sheet.journal-entry h1,
+.window-app.sheet.journal-sheet.journal-entry h2,
+.window-app.sheet.journal-sheet.journal-entry h3,
+.window-app.sheet.journal-sheet.journal-entry h4,
+.window-app.sheet.journal-sheet.journal-entry h5,
+.window-app.sheet.journal-sheet.journal-entry h6 {
+  font-family: "Roboto Condensed", Helvetica, sans-serif;
+}
+
 .window-app.sheet.journal-sheet.journal-entry section.journal-entry-content,
 .window-app.sheet.journal-sheet.journal-entry-page section {
-	background: url(https://assets.forge-vtt.com/61c6079e99b8eb56f3ca7ede/css/images/background_texture.png) repeat;
+  background: url(https://assets.forge-vtt.com/61c6079e99b8eb56f3ca7ede/DnDBeyond/css/images/background_texture.png) repeat;
+  margin: 0 0 15px;
+  line-height: 30px;
+  font-size: 16px;
 }
 
-.window-app.sheet.journal-sheet section.window-content h1,
-.window-app.sheet.journal-sheet section.window-content h2,
-.window-app.sheet.journal-sheet section.window-content h3,
-.window-app.sheet.journal-sheet section.window-content h4,
-.window-app.sheet.journal-sheet section.window-content h5,
-.window-app.sheet.journal-sheet section.window-content h6 {
-	font-family: "Roboto Condensed", Helvetica, sans-serif;
+.window-app.sheet.journal-sheet.journal-entry section.journal-entry-content is:(dl, ol, ul),
+.window-app.sheet.journal-sheet.journal-entry-page section is:(dl, ol, ul) {
+  margin: 0 0 0 19.5px;
 }
 
-.window-app.sheet.journal-sheet section.window-content h1 {
-	font-size: 36px;
-	line-height: 1.3;
-	margin: 0 0 0.2em;
+.window-app.sheet.journal-sheet.journal-entry section.journal-entry-content ul,
+.window-app.sheet.journal-sheet.journal-entry-page section ul {
+  list-style: initial;
+  padding: 15px;
 }
 
-.window-app.sheet.journal-sheet section.window-content h2 {
-	font-size: 24px;
-	line-height: 1.3;
-	margin: 0;
+.window-app.sheet.journal-sheet.journal-entry section.journal-entry-content is:(h1, h2, h3, h4, h5, h6),
+.window-app.sheet.journal-sheet.journal-entry-page section is:(h1, h2, h3, h4, h5, h6) {
+  font-family: Roboto,Helvetica,sans-serif;
+  line-height: 1.3;
+  margin: 0 0 .2em;
+  letter-spacing: 0;
+  word-wrap: break-word;
 }
 
-.window-app.sheet.journal-sheet section.window-content h3 {
-	font-size: 1.3em;
+.window-app.sheet.journal-sheet.journal-entry section.journal-entry-content is:(h1::after, h2::after, h3::after),
+.window-app.sheet.journal-sheet.journal-entry-page section is:(h1::after, h2::after, h3::after) {
+  content: '';
+  width: 100%;
+  margin: 5px auto 20px;
+  height: 3px;
+  display: block;
+  background-color: #8e0e1e;
 }
 
-.window-app.sheet.journal-sheet section.window-content h4,
-.window-app.sheet.journal-sheet section.window-content h5,
-.window-app.sheet.journal-sheet section.window-content h6 {
-	font-size: 1em;
-	font-weight: bold;
+.window-app.sheet.journal-sheet.journal-entry section.journal-entry-content h1,
+.window-app.sheet.journal-sheet.journal-entry-page section h1 {
+    font-size: 32px;
+    font-weight: 400;
+    margin-bottom: .8em;
+    clear: both;
+}
+
+.window-app.sheet.journal-sheet.journal-entry section.journal-entry-content h1::after ,
+.window-app.sheet.journal-sheet.journal-entry-page section h1::after {
+  max-width: 1200px;
+  height: 3px;
+}
+
+.window-app.sheet.journal-sheet.journal-entry section.journal-entry-content h2,
+.window-app.sheet.journal-sheet.journal-entry-page section h2 {
+    font-size: 26px;
+    font-weight: 400;
+    clear: both;
+}
+
+.window-app.sheet.journal-sheet.journal-entry section.journal-entry-content h3,
+.window-app.sheet.journal-sheet.journal-entry-page section h3 {
+  font-size: 22px;
+  font-weight: 400;
+  clear: both;
+}
+
+.window-app.sheet.journal-sheet.journal-entry section.journal-entry-content h4,
+.window-app.sheet.journal-sheet.journal-entry-page section h4 {
+  font-size: 18px;
+  font-wight: 700;
+}
+
+.window-app.sheet.journal-sheet.journal-entry section.journal-entry-content h5,
+.window-app.sheet.journal-sheet.journal-entry-page section h5,
+.window-app.sheet.journal-sheet.journal-entry section.journal-entry-content h6,
+.window-app.sheet.journal-sheet.journal-entry-page section h6 {
+  font-size: 16px;
+  font-wight: 700;
 }
 
 aside.block-torn-paper,
 aside.epigraph,
-aside.epigraph-with--author {
+aside.epigraph-with-author {
   overflow: auto;
   background: #fff;
   color: #242527;
@@ -50,16 +102,16 @@ aside.epigraph-with--author {
   font-size: 14px;
   border: solid transparent;
   border-width: 20px 10px;
-  border-image-source: url(https://assets.forge-vtt.com/61c6079e99b8eb56f3ca7ede/css/images/epigraph.png);
+  border-image-source: url(https://assets.forge-vtt.com/61c6079e99b8eb56f3ca7ede/DnDBeyond/css/images/5f1f1d66d16be68cf09d6ca172f8df92.png);
   border-image-repeat: repeat;
   border-image-slice: 20 10 20 10 fill;
   padding: 10px;
   position: relative;
 }
 
-aside.epigraph-with--author p:last-child{
-	font-style: italic;
-	text-align: right;
+aside.epigraph-with-author p:last-child {
+  font-style: italic;
+  text-align: right;
 }
 
 aside.rules-text {
@@ -73,12 +125,11 @@ aside.rules-text {
   border-style: solid;
   border-width: 15px 20px;
   border-image-repeat: repeat;
-  border-image-slice: 20 30 20 30 fill;
+  border-image-slice: 21 30 21 30 fill;
   background-color: transparent;
   padding: 20px 10px 10px;
   position: relative;
-  border-image-source: url(https://assets.forge-vtt.com/61c6079e99b8eb56f3ca7ede/css/images/quotebox_reference_rose.png);
-  -webkit-filter: drop-shadow(0 5px 8px #ccc);
+  border-image-source: url(https://assets.forge-vtt.com/61c6079e99b8eb56f3ca7ede/DnDBeyond/css/images/quotebox_reference_rose.png);
   filter: drop-shadow(0 5px 8px #ccc);
 }
 
@@ -93,12 +144,12 @@ aside.read-aloud-text {
   margin: 30px 0;
   line-height: 1.6;
   font-size: 14px;
-  color: var(--theme-read-aloud-fg-color,#242527);
+  color: #242527;
   border: 8px solid transparent;
   border-image-repeat: repeat;
   border-image-slice: 8 8 8 8 fill;
   background-color: transparent;
   padding: 20px 20px 10px !important;
   position: relative;
-  border-image-source: url(https://assets.forge-vtt.com/61c6079e99b8eb56f3ca7ede/css/images/read-aloud-cos.png);
+  border-image-source: url(https://assets.forge-vtt.com/61c6079e99b8eb56f3ca7ede/DnDBeyond/css/images/read-aloud-cos.png);
 }
