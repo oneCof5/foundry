@@ -1,44 +1,24 @@
-let thePassive = 'Perception';
-let messageContent;
+// filter the canvas for NPCs that aren't dead
+const theTs = canvas.tokens.placeables
+  .filter((tok) => tok.actor.system.attributes.hp.value > 0 && !tok.document?.hasPlayerOwner);
 
-messageContent = `  <div class="monks-tokenbar savingthrow chat-card">`;
-messageContent += `    <header class="card-header flexrow"><h3 class="item-name">Passive ${thePassive}</header>`;
-messageContent += `    <div class="message-content" style="margin:5px 0px">`;
-messageContent += `      <div class="form-group sheet actor">`;
-messageContent += `        <ol class="items-list inventory-list">`;
-messageContent += `          <li class="items-header flexrow"><h3 class="item-name flexrow">Actors</h3></li>`;
-messageContent += `          <ol class="itemlist">`;
-
-//  <img src="icons/svg/eye.svg" title="Passive ${thePassive}" width="36" height="36">
-
-// Gather tokens in the current scene into an array.
-let theTs = canvas.tokens.placeables
-  .filter((token) => token.data && token.actor)
-  .filter((token) => token.actor.data.data.attributes.hp.value > 0);
-
-// Filter out duplicate actors (i.e. all goblins have the same passive perception)
+// get unique actors (all goblins have the same perception)
 let uniqueTs = [...new Map(theTs.map((m) => [m.actor.id, m])).values()];
 
 // Sort the output array by type and passive.
 uniqueTs.sort(function (a,b) {
-  return b.actor.data.data.skills.prc.passive - a.actor.data.data.skills.prc.passive
+  return b.actor.system.skills.prc.passive - a.actor.system.skills.prc.passive
 });
 
 // Build chat message content.
+let msgContent = `<div><table><thead><tr><th colspan=2>Token</th><th>Passive Perception</th></tr></thead><tbody>`;
 for (let uniqueT of uniqueTs) {
-  messageContent += `<li class="item flexrow " data-item-id="${uniqueT.id}" style=""><div class="dice-roll flexcol"><div class="item-row flexrow"><div class="item-name flexrow"><div class="item-image" style="background-image:url('${uniqueT.data.img}')"></div><h4 class="noselect">${uniqueT.data.name}</h4></div><div class="roll-controls flexrow"><div class="dice-total flexrow noselect"><div class="dice-result noselect reveal"><span class="total">${uniqueT.actor.data.data.skills.prc.passive}</span></div></div></div></div></li>`;
+  msgContent += `<tr height="32"><td><img src="${uniqueT.document.texture.src}" width=30 height=30 style="border: none;"/></td><td style="padding-left" 6px"><strong>${uniqueT.document.name}</strong></td><td>${uniqueT.actor.system.skills.prc.passive}</td></tr>`;
 }
-
-// close out the ol and divs
-messageContent += `</ol></ol></div></div></div>`;
-
-console.log(messageContent);
+msgContent += `</tbody></table></div>`;
 
 // create the message
-const chatData = {
-  user: game.user._id,
-  speaker: game.user,
-  content: messageContent,
-  whisper: game.users.filter((u) => u.isGM).map((u) => u._id),
-};
-ChatMessage.create(chatData, {});
+ChatMessage.create({
+  'content': msgContent,
+  'whisper': ChatMessage.getWhisperRecipients('GM')
+});
